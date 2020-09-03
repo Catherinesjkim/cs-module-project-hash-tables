@@ -24,12 +24,9 @@ class HashTable:
     def __init__(self, capacity):
         # Your code here
         # initialize the hash table with empty bucket list entries
-        self.size = 11
-        self.capacity = [None] * self.size
-        self.value = [None] * self.size
-        self.table = []
-        for i in range(capacity):
-            self.table.append([])
+        self.capacity = MIN_CAPACITY
+        self.count = 0
+        self.storage = [None] * capacity
 
     def get_num_slots(self):
         """
@@ -42,7 +39,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        return len(self.capacity)
+        return self.capacity
 
 # Once the hash values have been computed, we can insert each item into the hash table at the designated position. This is referred to as the load factor, and is commonly denoted by 𝜆 = 𝑛𝑢𝑚𝑏𝑒𝑟 𝑜𝑓 𝑖𝑡𝑒𝑚𝑠 / 𝑡𝑎𝑏𝑙𝑒 𝑠𝑖𝑧𝑒
     def get_load_factor(self):
@@ -52,18 +49,19 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return self.count / self.capacity
 
 
+    """
+    DJB2 hash, 32-bit
+
+    Implement this
+    """
     def djb2(self, key):
-        """
-        DJB2 hash, 32-bit
-
-        Implement this
-        """
-        key = 5381
-        for x in self:
-            key = ((key << 5) + key) + ord(x)
-        return key & 0xFFFFFFFF
+        hash = 5381
+        for element in key:
+            hash = (hash * 33) + ord(element)
+        return hash
 
 
     def hash_index(self, key):
@@ -83,14 +81,17 @@ class HashTable:
     # Inserts a new item into the hash table
     def put(self, key, value):
         # Your code here
-        # get the bucket list where this item will go
-        bucket = hash(key) % len(self.table)
-        bucket_list = self.table[bucket]
+        index = self.hash_index(key)
+        entry = HashTableEntry(key, value)
+        storage = self.storage[index]
+        self.count += 1
         
-        # insert the item to the end of the bucket list
-        bucket_list.append(key)
-        
-
+        if storage:
+            self.storage[index] = entry
+            self.storage[index].next = storage
+        else:
+            self.storage[index] = entry
+            
 
     """
     Remove the value stored with the given key.
@@ -101,13 +102,9 @@ class HashTable:
     """
     # Removes an item with matching key from the hash table
     def delete(self, key):
-        # get the bucket list where this item will be removed from
-        bucket = hash(key) % len(self.table)
-        bucket_list = self.table[bucket]
-        
-        # remove the item from the bucket list if it is present
-        if key in bucket_list:
-            bucket_list.remove(key)
+        # get the list where this item will be removed from
+        self.put(key, None)
+        self.count -= 1
 
     """
     Retrieve the value stored with the given key.
@@ -120,16 +117,12 @@ class HashTable:
     # returns the item if found, or None if not found
     def get(self, key):
         # get the bucket list where this key would be
-        bucket = hash(key) % len(self.table)
-        bucket_list = self.table[bucket]
-        
-        # search for the key in the bucket list
-        if key in bucket_list:
-            # find the item's index and return the item that is in the bucket list
-            item_index = bucket_list.index(key)
-            return bucket_list[item_index]
-        else:
-            # the key is not found
+        index = self.hash_index(key)
+        storage = self.storage[index]
+        while storage:
+            if storage.key == key:
+                return storage.value
+            storage = storage.next
             return None
 
 
