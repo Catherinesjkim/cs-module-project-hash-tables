@@ -1,3 +1,4 @@
+# 
 class HashTableEntry:
     """
     Linked List hash table key/value pair
@@ -10,19 +11,25 @@ class HashTableEntry:
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
 
-
-class HashTable:
-    """
+"""
     A hash table that with `capacity` buckets
     that accepts string keys
 
     Implement this.
-    """
-# I use two lists to create a HashTable class that implements the Map abstract data type. One list, called capacity, will hold the key items and a parallel list. Second list, called value, will hold the data values. When we look up a key, the corresponding position in the data list will hold the associated data value. We will treat the key list as a hash table. The initial size for the hash table is 11. Although this is arbitrary, it is important that the size be a prime number so that the collision resolution algorithm can be as efficient as possible. 
+"""
+# HashTable class using chaining
+class HashTable:
+# Constructor with optional initial capacity parameter
+# Assigns all buckets with an empty list
     def __init__(self, capacity):
+        # Your code here
+        # initialize the hash table with empty bucket list entries
         self.size = 11
         self.capacity = [None] * self.size
         self.value = [None] * self.size
+        self.table = []
+        for i in range(capacity):
+            self.table.append([])
 
     def get_num_slots(self):
         """
@@ -66,83 +73,64 @@ class HashTable:
         """
         return self.djb2(key) % self.capacity
 
-# hashfunction implements the simple remainder method. The collision resolution technique is linear probing with a “plus 1” rehash function. The put function assumes that there will eventually be an empty slot unless the key is already present in the self.capacity. It computes the original hash value and if that slot is not empty, iterates the rehash function until an empty slot occurs. If a nonempty slot already contains the key, the old value is replaced with the new value. Dealing with the situation where there are no empty capcity left
+    """
+    Store the value with the given key.
+
+    Hash collisions should be handled with Linked List Chaining.
+
+    Implement this.
+    """
+    # Inserts a new item into the hash table
     def put(self, key, value):
-        """
-        Store the value with the given key.
-
-        Hash collisions should be handled with Linked List Chaining.
-
-        Implement this.
-        """
-        hashvalue = self.hashfunction(key, len(self.capacity))
-        
-        if self.capacity[hashvalue] == None:
-            self.capacity[hashvalue] = key
-            self.value[hashvalue] = value
-        else:
-            if self.capacity[hashvalue] == key:
-                self.value[hashvalue] = value # replace 
-            else:
-                nextcapacity = self.rehash(hashvalue, len(self.capacity))
-                while self.capacity[nextcapacity] != None and \
-                    self.capacity[nextcapacity] != key:
-                        nextcapacity = self.rehash(nextcapacity, len(self.capacity))
-                
-                if self.capacity[nextcapacity] == None:
-                    self.capacity[nextcapacity] = key
-                    self.value[nextcapacity] = value
-                else:
-                    self.value[nextcapacity] = value # replace
-
-    def hashfunction(self, key, size):
-        return key % size
-    
-    def rehash(self, oldhash, size):
-        return (oldhash + 1) % size
-
-
-    def delete(self, key):
-        """
-        Remove the value stored with the given key.
-
-        Print a warning if the key is not found.
-
-        Implement this.
-        """
         # Your code here
-
-# The final methods of the HashTable class provide additional dictionary functionality. Overload the __getitem__ and __setitem__ methods to allow access using``[]``. This means that once a HashTable has been created, the familiar index operator will be available.
-    def get(self, key):
-        """
-        Retrieve the value stored with the given key.
-
-        Returns None if the key is not found.
-
-        Implement this.
-        """
-        startcapacity = self.hashfunction(key, len(self.capacity))
+        # get the bucket list where this item will go
+        bucket = hash(key) % len(self.table)
+        bucket_list = self.table[bucket]
         
-        value = None
-        stop = False
-        found = False
-        position = startcapacity
-        while self.capacity[position] != None and \
-                                not found and not stop:
-            if self.capacity[position] == key:
-                found = True
-                value = self.value[position]
-            else:
-                position = self.resize(position, len(self.capacity))
-                if position == startcapacity:
-                    stop = True
-        return value
+        # insert the item to the end of the bucket list
+        bucket_list.append(key)
+        
 
-    def __getitem__(self, key):
-        return self.get(key)
-    
-    def __setitem__(self, key, value):
-        self.put(key, value)
+
+    """
+    Remove the value stored with the given key.
+
+    Print a warning if the key is not found.
+
+    Implement this.
+    """
+    # Removes an item with matching key from the hash table
+    def delete(self, key):
+        # get the bucket list where this item will be removed from
+        bucket = hash(key) % len(self.table)
+        bucket_list = self.table[bucket]
+        
+        # remove the item from the bucket list if it is present
+        if key in bucket_list:
+            bucket_list.remove(key)
+
+    """
+    Retrieve the value stored with the given key.
+
+    Returns None if the key is not found.
+
+    Implement this.
+    """
+    # searches for an item with matching key in the hash table
+    # returns the item if found, or None if not found
+    def get(self, key):
+        # get the bucket list where this key would be
+        bucket = hash(key) % len(self.table)
+        bucket_list = self.table[bucket]
+        
+        # search for the key in the bucket list
+        if key in bucket_list:
+            # find the item's index and return the item that is in the bucket list
+            item_index = bucket_list.index(key)
+            return bucket_list[item_index]
+        else:
+            # the key is not found
+            return None
 
 
     def resize(self, new_capacity):
@@ -191,4 +179,5 @@ if __name__ == "__main__":
 
     print("")
 
-# hex(hash_djb2(u'hello world, 世界'))  # '0xa6bd702fL'
+
+
