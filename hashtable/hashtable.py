@@ -7,7 +7,6 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
-
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
 
@@ -19,10 +18,11 @@ class HashTable:
 
     Implement this.
     """
-
+# I use two lists to create a HashTable class that implements the Map abstract data type. One list, called capacity, will hold the key items and a parallel list. Second list, called value, will hold the data values. When we look up a key, the corresponding position in the data list will hold the associated data value. We will treat the key list as a hash table. The initial size for the hash table is 11. Although this is arbitrary, it is important that the size be a prime number so that the collision resolution algorithm can be as efficient as possible. 
     def __init__(self, capacity):
-        # Your code here
-
+        self.size = 11
+        self.capacity = [None] * self.size
+        self.value = [None] * self.size
 
     def get_num_slots(self):
         """
@@ -35,8 +35,9 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return len(self.capacity)
 
-
+# Once the hash values have been computed, we can insert each item into the hash table at the designated position. This is referred to as the load factor, and is commonly denoted by 𝜆 = 𝑛𝑢𝑚𝑏𝑒𝑟 𝑜𝑓 𝑖𝑡𝑒𝑚𝑠 / 𝑡𝑎𝑏𝑙𝑒 𝑠𝑖𝑧𝑒
     def get_load_factor(self):
         """
         Return the load factor for this hash table.
@@ -46,23 +47,16 @@ class HashTable:
         # Your code here
 
 
-    def fnv1(self, key):
-        """
-        FNV-1 Hash, 64-bit
-
-        Implement this, and/or DJB2.
-        """
-
-        # Your code here
-
-
     def djb2(self, key):
         """
         DJB2 hash, 32-bit
 
-        Implement this, and/or FNV-1.
+        Implement this
         """
-        # Your code here
+        key = 5381
+        for x in self:
+            key = ((key << 5) + key) + ord(x)
+        return key & 0xFFFFFFFF
 
 
     def hash_index(self, key):
@@ -70,9 +64,9 @@ class HashTable:
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        #return self.fnv1(key) % self.capacity
         return self.djb2(key) % self.capacity
 
+# hashfunction implements the simple remainder method. The collision resolution technique is linear probing with a “plus 1” rehash function. The put function assumes that there will eventually be an empty slot unless the key is already present in the self.capacity. It computes the original hash value and if that slot is not empty, iterates the rehash function until an empty slot occurs. If a nonempty slot already contains the key, the old value is replaced with the new value. Dealing with the situation where there are no empty capcity left
     def put(self, key, value):
         """
         Store the value with the given key.
@@ -81,7 +75,31 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        hashvalue = self.hashfunction(key, len(self.capacity))
+        
+        if self.capacity[hashvalue] == None:
+            self.capacity[hashvalue] = key
+            self.value[hashvalue] = value
+        else:
+            if self.capacity[hashvalue] == key:
+                self.value[hashvalue] = value # replace 
+            else:
+                nextcapacity = self.rehash(hashvalue, len(self.capacity))
+                while self.capacity[nextcapacity] != None and \
+                    self.capacity[nextcapacity] != key:
+                        nextcapacity = self.rehash(nextcapacity, len(self.capacity))
+                
+                if self.capacity[nextcapacity] == None:
+                    self.capacity[nextcapacity] = key
+                    self.value[nextcapacity] = value
+                else:
+                    self.value[nextcapacity] = value # replace
+
+    def hashfunction(self, key, size):
+        return key % size
+    
+    def rehash(self, oldhash, size):
+        return (oldhash + 1) % size
 
 
     def delete(self, key):
@@ -94,7 +112,7 @@ class HashTable:
         """
         # Your code here
 
-
+# The final methods of the HashTable class provide additional dictionary functionality. Overload the __getitem__ and __setitem__ methods to allow access using``[]``. This means that once a HashTable has been created, the familiar index operator will be available.
     def get(self, key):
         """
         Retrieve the value stored with the given key.
@@ -103,7 +121,28 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        startcapacity = self.hashfunction(key, len(self.capacity))
+        
+        value = None
+        stop = False
+        found = False
+        position = startcapacity
+        while self.capacity[position] != None and \
+                                not found and not stop:
+            if self.capacity[position] == key:
+                found = True
+                value = self.value[position]
+            else:
+                position = self.resize(position, len(self.capacity))
+                if position == startcapacity:
+                    stop = True
+        return value
+
+    def __getitem__(self, key):
+        return self.get(key)
+    
+    def __setitem__(self, key, value):
+        self.put(key, value)
 
 
     def resize(self, new_capacity):
@@ -151,3 +190,5 @@ if __name__ == "__main__":
         print(ht.get(f"line_{i}"))
 
     print("")
+
+# hex(hash_djb2(u'hello world, 世界'))  # '0xa6bd702fL'
