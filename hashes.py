@@ -28,19 +28,46 @@ SHA: Secure Hashing Algo
 # Non-reversible
 # Avoid collisions
 
+hash_table = [None] * 8 # 8 slots, all initialized to None
+
 # O(n) for length of key
-def my_hash(s, limit):
+def my_hash(self):
     # take every character in the string, and convert character to number
     # Convert each character into UTF-8 numbers (it allows for more characters than ASCII & Unicode)
-    string_utf = s.encode()
+    string_utf = self.encode()
     
     total = 0
     # O(n): n is the length of the string ("key")
     for char in string_utf:
         total += char
         total &= 0xffffffff # limit total to 32 bits 
-    return total % limit # capacity
+    return total # capacity
+
+def hash_index(key):
+    hash_num = my_hash(key)
+    return hash_num % len(hash_table)
+
+def put(key, value):
+    # hash the key and get an index
+    i - hash_index(key)
+    # CHECK IF SOMETHING ALREADY EXISTS AT THAT INDEX
+    if hash_table[i] != None:
+        print(f"Collision! Overwriting {repr(hash_table[i])}!")
+    # Store the value in the array at the hashed index
+    hash_table[i] = value
     
+def get(key):
+    # hash the key and get an Index
+    i = hash_index(key)
+    # Return the value from the array at that index
+    return hash_table[i]
+
+put("Hello", "Hello Value")
+put("World", "World Value")
+    
+print(hash_table)
+
+
 # No DS can exist without having a specific initial size limit --> resize later
 hash_table = [None] * 8 # 8 none values - of size of power of 2 - for our hash function to return 32 bits
 #  1,   2,   4,   8,  16,  32,  64,  128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536
