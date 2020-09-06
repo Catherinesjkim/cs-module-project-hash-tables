@@ -28,6 +28,17 @@ SHA: Secure Hashing Algo
 # Non-reversible
 # Avoid collisions
 
+# Similar to node class in LL - I can have 8 LL potentially
+class HashTabelEntry:
+    """
+    Linked List hash table key/value pair
+    """
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        # will linked the nodes together
+        self.next = None
+        
 hash_table = [None] * 8 # 8 slots, all initialized to None
 
 # O(n) for length of key
@@ -49,7 +60,10 @@ def hash_index(key):
 
 def put(key, value):
     # hash the key and get an index
-    i - hash_index(key)
+    i = hash_index(key)
+    
+    # find the start of the linked list using the index
+    
     # CHECK IF SOMETHING ALREADY EXISTS AT THAT INDEX
     if hash_table[i] != None:
         print(f"Collision! Overwriting {repr(hash_table[i])}!")
@@ -125,4 +139,9 @@ my_list[my_hashing_func("deepskyblue", len(my_list))] = "#00BFFF"
 my_list[my_hashing_func("forestgreen", len(my_list))] = "#228B22"
 # get value from list
 # print(my_list[my_hashing_func("forestgreen", len(my_list))])
+
+
+"""
+Day 2: Pseudocode of collisions management and resizing functions
+"""
 
