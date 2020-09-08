@@ -15,11 +15,13 @@ class HashTableEntry:
         self.value = value
         # next to search
         self.next = None
+        
+    def __repr__(self):
+        return f'{self.value} -> {self.next}'
 
 # Hash table can't have fewer than this many buckets - to the power of 2 - number that works well with binary
 MIN_CAPACITY = 8
 
-# Day 1
 # HashTable class using chaining
 class HashTable:
 # Constructor with optional initial capacity parameter
@@ -30,27 +32,37 @@ class HashTable:
         # Your code here
         # initialize the hash table with empty storage list entries
         # size of the array = min 8
-        self.capacity = MIN_CAPACITY
-        self.count = 0
         # will store our data in - set equal to None force python to get a list that has a fixed length
-        self.bucket = [None] * capacity
+        self.capacity = MIN_CAPACITY
+        self.bucket = [None] * self.capacity
+        self.count = 0
+        
+    def __repr__(self):
+        return str(self.capacity)
 
     # Return the length of the list you're using to hold the hash table data. (Not the number of items stored in the hash table, but the number of slots in the main list.) 
     # One of the tests relies on this. Implement this.
     def get_num_slots(self):
-        # Your code here
-        return self.capacity
-
+        return len(self.bucket)
+    
+    # Return the load factor for this hash table. Implement this.
+    # If I'm runing out of space, let's keep track of the load factor.
+    # I need to know when to increase the size of our table
+    # Load Factor function - trigger the resize - is it time to do that?
+    def get_load_factor(self):
+        # num items (how many inserted) / num of buckets of array (length of the table)
+        return self.count / len(self.bucket)
+    
     # DJB2 hash, 32-bit. Implement this
-    # returning my string into utf/unicode 
+    # returning my string into utf/unicode
     # hash function - gets the hash - take a string, mess it up, and output a number
     def djb2(self, key):
-        # Your code here
         hash = 5381
         # iterates characters in key,
         for character in key:
-            hash = (hash * 33) + ord(character) # ord: numerical value of that character -->
-        return hash
+            # ord: numerical value of that character -->
+            hash = (( hash << 5) + hash) + ord(character)
+        return hash & 0xFFFFFFFF
 
     # hash index function - gets the index
     # Take an arbitrary key and return a valid integer index within the storage capacity of the hash table
@@ -67,22 +79,35 @@ class HashTable:
         index = self.hash_index(key) 
         # find the start of the linked list using the index
         # insert into the head of this LL a new HashTableEntry
-        # entry is what I want to enter in the cell, constructing a list from the key and value passed in
-        entry = HashTableEntry(key, value)
-        # set the index into my bucket in the array
-        bucket = self.bucket[index]
-        # keeping track of the count and increasing by one
+        # store as LL node
+        node = HashTableEntry(key, value)
+        # print(node)
+        key = self.bucket[index]
+        
         self.count += 1
-        # Search through the whole list
-        # IF the key already exists in the LL 
-        if bucket:
-            self.bucket[index] = entry
-            # Replace the value
-            self.bucket[index].next = bucket
-        # Else
-        else: 
-            # Add new HashTable Entry to the head of LL
-            self.bucket[index] = entry
+        
+        # the key exist
+        if key:
+            # overwrite with the node
+            self.bucket[index] = node
+            self.bucket[index].next = key
+        # if self.capacity[index] exist,
+        # use LL to set next to the repeated key and value
+        else:
+            self.bucket[index] = node
+        # print('adding node', node.next)
+        print(self.bucket)
+        return self.bucket[index]
+        
+            
+    # Remove the value stored with the given key. Print a warning if the key is not found. Implement this.
+    # Removes an item with matching key from the hash table
+    def delete(self, key):
+        # Search through the LL for the matching key
+        # Delete from that node
+        # Save the value and return the value of deleted node (or None)
+        self.count -= 1
+        self.put(key, None)
             
     # Retrieve the value stored with the given key. Returns None if the key is not found. Implement this.
     # searches for an item with matching key in the hash table
@@ -90,62 +115,62 @@ class HashTable:
     def get(self, key):
         # get the storage list where this key would be
         # hash the key and get an index
-        index = self.hash_index(key)
+        item = self.hash_index(key)
         # Get the LL AT the computed index
-        bucket = self.bucket[index]
+        storage = self.bucket[item]
         # Search through the LL for the key
         # Compare keys until you find the right one
-        while bucket:
+        while storage:
             # locate the bucket, if that bucket is not None, then iteratate through the pairs that are in that bucket, find the value that matches that key and return that value
             # IF the key exists, return the value
-            if bucket.key == key:
-                return bucket.value
-            bucket = bucket.next
-            
-            # if we don't find that key, we return None
-            return None
-        
-    # Remove the value stored with the given key. Print a warning if the key is not found. Implement this.
-    # Removes an item with matching key from the hash table
-    def delete(self, key):
-        # Search through the LL for the matching key
-        # Delete from that node
-        # Save the value and return the value of deleted node (or None)
-        self.put(key, None)
-        self.count -= 1
-
-        
-    # Day 2
-    # Return the load factor for this hash table. Implement this.
-    # If I'm runing out of space, let's keep track of the load factor.
-    # I need to know when to increase the size of our table
-    # Load Factor function - trigger the resize - is it time to do that?
-    def get_load_factor(self):
-        # num items (how many inserted) / num of buckets of array (length of the table)
-        return self.count / self.capacity
+            if storage.key == key:
+                return storage.value
+            storage = storage.next
 
     # Changes the capacity of the hash table and rehashes all key/value pairs. Implement this.
-    # If load factor is too high (over 0.7) --> RESIZE!
-    # If load factor is too small (under 0.2) --> DOWNSIZE! (you don't want to take too much of what you don't need)
+    # If load factor is too high > 0.7 --> RESIZE!
     # Expand the table/array if load factor > 0.7 (double the current array size: x 2)
+    # If load factor is too small < 0.2 --> DOWNSIZE!
     # Shrink if < 0.2 (halve the array size: 1/2)
     # loadFactor = numElements/numSlots, numSlots (len(arr)), numElements (manually keeping track of it)
-    # If it exists, del -1
-    # If it doesn't exist, I don't have to del anything
-    # will improve searching
+    # This will improve searching
     # Time Complexity: O(n) - number of total items - quite expensive - linear based on the number of items
+    # Make a new array that's DOUBLE the current size - you don't want to double forever - start small, keep resizing in longer increments
+        # Go through each LL in the array
+        # Go through each item and re-hash it - the hash index is dependent on the length
+        # Insert the items into their new locations - reuse put function here
     def resize(self, new_capacity):
-        # Make a new array that's DOUBLE the current size - you don't want to double forever - start small, keep resizing in longer increments
-        # Go through each LL in the array 
-            # Go through each item and re-hash it - the hash index is dependent on the length
-            # Insert the items into their new locations - reuse put function here
-        pass
-    
-    def shrink(self, new_capacity):
-        # Same as resize, but reduce array by HALF
-        pass
-    
-    
+        self.capacity = new_capacity
+        # downsize
+        if self.get_load_factor() < 0.2:
+            new_capacity //= 2
+            self.capacity = new_capacity
+            old_bucket = self.bucket
+            self.bucket = [None] * self.capacity
+            # Traverse the old bucket and pass each previous val into the put method of our empty bucket
+            for node in old_bucket:
+                while True:
+                    if node != None:
+                        self.put(node.key, node.value)
+                        if node.next == None:
+                            break
+                        node = node.next
+                    else: break
+        if self.get_load_factor() > 0.7:
+            # new_capacity *= 2
+            self.capacity = new_capacity
+            # get key to rehash and value to correspond to key
+            old_bucket = self.bucket
+            self.bucket = [None] * self.capacity
+            for node in old_bucket:
+                while True:
+                    if node != None:
+                        self.put(node.key, node.value)
+                        if node.next == None:
+                            break
+                        node = node.next
+                    else: break
+
 
 if __name__ == "__main__":
     ht = HashTable(8)
@@ -170,17 +195,17 @@ if __name__ == "__main__":
         print(ht.get(f"line_{i}"))
 
     # Test resizing
-    # old_capacity = ht.get_num_slots()
-    # ht.resize(ht.capacity * 2)
-    # new_capacity = ht.get_num_slots()
+    old_capacity = ht.get_num_slots()
+    ht.resize(ht.capacity * 2)
+    new_capacity = ht.get_num_slots()
 
-    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
     # Test if data intact after resizing
-    # for i in range(1, 13):
-    #     print(ht.get(f"line_{i}"))
+    for i in range(1, 13):
+        print(ht.get(f"line_{i}"))
 
-    # print("")
+    print("")
 
 
 
