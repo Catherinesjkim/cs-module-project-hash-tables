@@ -11,6 +11,8 @@ There must be no extra spaces at the end of your returned string.
 
 The solution must be `O(n)`
 
+LS test file passed OK
+
 """
 from collections import Counter
 

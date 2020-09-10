@@ -21,20 +21,27 @@ Hello, my cat. And my cat doesn't say "hello" back.
 
 5. Split the strings into words on any whitespace: Done
 
-6. Ignore each of the following characters:
+6. Ignore each of the following characters: Done
 ```
 " : ; , . - + = / \ | [ ] { } ( ) * ^ &
 ```
 
-7. If the input contains no ignored characters, return an empty dictionary: ?
+7. If the input contains no ignored characters, return an empty dictionary: Done
 
 """
 
+import re
+
 def word_count(string):
-    counts = dict()
+    separators = '":;,.-+=/\|[]{}()*^&'
+    
     words = string.lower().split()
+    counts = {}
     
     for word in words:
+        word = word.strip(separators)
+        if not word:
+            break
         if word in counts:
             counts[word] += 1
         else: 
