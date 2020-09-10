@@ -30,8 +30,6 @@ Hello, my cat. And my cat doesn't say "hello" back.
 
 """
 
-import re
-
 def word_count(string):
     separators = '":;,.-+=/\|[]{}()*^&'
     

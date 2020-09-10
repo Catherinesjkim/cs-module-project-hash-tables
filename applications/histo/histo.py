@@ -13,11 +13,11 @@ It should open the file, and work through it to produce the output.
 
 ## Output
 
-1. Print a histogram showing the word count for each word, one hash mark
-for every occurrence of the word.
-
-2. Output will be first ordered by the number of words, then by the word
+1. Output will be first ordered by the number of words, then by the word
 (alphabetically).
+
+2. Print a histogram showing the word count for each word, one hash mark
+for every occurrence of the word.
 
 3. The hash marks should be left justified two spaces after the longest
 word.
@@ -35,8 +35,6 @@ word.
 7. If the input contains no ignored characters, print nothing.
 
 """
-import re
-
 # Open the file in read mode
 text = open("robin.txt", "r")
 
@@ -47,16 +45,16 @@ d = dict()
 for line in text:
 	# Remove the leading spaces and newline character
 	line = line.strip()
-	
+
 	# Convert the characters in line to lower case to avoid case mismatch
 	line = line.lower()
-	
+
 	# split the line into words
 	words = line.split(" ")
-	
+
 	# ignore special characters
 	separators = '":;,.-+=/\|[]{}()*^&'
-	
+
 	# Compute the number of times each word occurs
 	# Iterate over each word in line
 	# Output a list of word count pairs sorted from highest to lowest count
@@ -64,46 +62,26 @@ for line in text:
 		# Check if the word is already in dictionary
 		# Clean punctuation
 		word = word.strip(separators)
-		
+
 		if word in d:
 			# increment count of word by 1
 			d[word] = d[word] + 1
 		else:
 			# Add the word to dictionary with count 1
 			d[word] = 1
-   
+
 	# Reverse the key and values so they can be sorted using tuples.
 	# word_freq = []
 	# for key, value in d.items():
 	# 	word_freq.append((value, key))
-  
+
 	# Sort from highest to lowest
 	# word_freq.sort(reverse=True)
 	# print(word_freq)
-   
+
 # Print the contents of dictionary
 for key in list(d.keys()):
 	print(key, ":", d[key])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 """
