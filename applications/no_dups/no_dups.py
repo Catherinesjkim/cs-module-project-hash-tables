@@ -25,10 +25,11 @@ def no_dups(string):
     # now create dictionary using counter method
     # which will have strings as key and their frequencies as value
     UniqW = Counter(string)
-
+    
     # joins two adjacent elements in iterable way
     s = " ".join(UniqW.keys())
-    print(s)
+    
+    return s
 
 
 # Driver program

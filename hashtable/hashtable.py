@@ -61,7 +61,7 @@ class HashTable:
         # iterates characters in key,
         for character in key:
             # ord: numerical value of that character -->
-            hash = (( hash << 5) + hash) + ord(character)
+            hash = ((hash << 5) + hash) + ord(character)
         return hash & 0xFFFFFFFF
 
     # hash index function - gets the index
@@ -143,11 +143,13 @@ class HashTable:
         self.capacity = new_capacity
         # downsize
         if self.get_load_factor() < 0.2:
+            # new_capacity = new_capacity // 2
+            # // without a decimal part
             new_capacity //= 2
             self.capacity = new_capacity
             old_bucket = self.bucket
             self.bucket = [None] * self.capacity
-            # Traverse the old bucket and pass each previous val into the put method of our empty bucket
+            # Traverse the old bucket and pass each previous value into the put method of our empty bucket
             for node in old_bucket:
                 while True:
                     if node != None:
