@@ -19,8 +19,6 @@ def lookupTable(x, y):
     for var in x:
         pass
 
-
-
 def slowfun_too_slow(x, y):
     v = math.pow(x, y)
     v = math.factorial(v)

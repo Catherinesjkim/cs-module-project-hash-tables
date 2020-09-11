@@ -35,53 +35,38 @@ word.
 7. If the input contains no ignored characters, print nothing.
 
 """
-# Open the file in read mode
-text = open("robin.txt", "r")
+import collections
 
-# Create an empty dictionary
-d = dict()
+d = collections.OrderedDict()
+with open("robin.txt") as f:
+    words = f.read()
 
-# Loop through each line of the file
-for line in text:
-	# Remove the leading spaces and newline character
-	line = line.strip()
+words = words.split()
 
-	# Convert the characters in line to lower case to avoid case mismatch
-	line = line.lower()
+# Print a histogram showing the word count for each word, one hash mark for every occurrence of the word.
+for word in words:
+    # Ignore each of the following characters:
+    # " : ; , . - + = / \ | [ ] { } ( ) * ^ &
+    word = word.strip('":;,.-+=/\\|[]{}()*^&!?''')
+    # Case should be ignored, and all output forced to lowercase.
+    word = word.lower()
+    if word in d:
+        d[word] = d[word] + '#'
+    else:
+        d[word] = '#'
 
-	# split the line into words
-	words = line.split(" ")
+# The hash marks should be left justified two spaces after the longest word.
+# find longest word
+longest_word = ''
+for key in d.keys():
+    if len(key) > len(longest_word):
+        longest_word = key
+# Output will be first ordered by the number of words, then by the word (alphabetically).
+# get dictionary sorted by values
+for w in sorted(d, key=d.get, reverse=False):
+    # How do I do this based on the longest word
+    print(f'{w:<20} {d[w]}')
 
-	# ignore special characters
-	separators = '":;,.-+=/\|[]{}()*^&'
-
-	# Compute the number of times each word occurs
-	# Iterate over each word in line
-	# Output a list of word count pairs sorted from highest to lowest count
-	for word in words:
-		# Check if the word is already in dictionary
-		# Clean punctuation
-		word = word.strip(separators)
-
-		if word in d:
-			# increment count of word by 1
-			d[word] = d[word] + 1
-		else:
-			# Add the word to dictionary with count 1
-			d[word] = 1
-
-	# Reverse the key and values so they can be sorted using tuples.
-	# word_freq = []
-	# for key, value in d.items():
-	# 	word_freq.append((value, key))
-
-	# Sort from highest to lowest
-	# word_freq.sort(reverse=True)
-	# print(word_freq)
-
-# Print the contents of dictionary
-for key in list(d.keys()):
-	print(key, ":", d[key])
 
 
 """

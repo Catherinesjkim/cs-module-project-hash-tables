@@ -15,7 +15,8 @@ class HashTableEntry:
         self.value = value
         # next to search
         self.next = None
-        
+    
+    # for better representation of my output
     def __repr__(self):
         return f'{self.value} -> {self.next}'
 
